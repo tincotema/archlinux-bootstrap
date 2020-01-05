@@ -1,29 +1,20 @@
-# Gentoo installation script
+# Arch installation script
 
-**TL;DR:** Installs gentoo on a new system, suited for both servers and desktops.
+**TL;DR:** Installs Archlinux on a new system, suited for both servers and desktops.
 Optionally prepares ansible for automatic system configuration.
 See [Install](#Install) for usage instructions.
 
 ---
 
-This script will install a minimal (no-bloat) EFI bootable gentoo system.
-It will stick closely to the [Gentoo AMD64 Handbook](https://wiki.gentoo.org/wiki/Handbook:AMD64)
-and [Sakaki's EFI Install Guide](https://wiki.gentoo.org/wiki/Sakaki%27s_EFI_Install_Guide).
+This script will install a minimal EFI bootable arch system without an X-server.
+It will stick closely to the [Arch Wiki Installation Guide](https://wiki.archlinux.org/index.php/installation_guide)
 
 What you will get:
 
-* Minimal system configuration
-* Temporary vanilla kernel (precompiled by gentoo), in my opinion you
-  should replace this kernel with a custom made kernel for your system.
-  See [Kernel](#Kernel) for details on how to achieve that with low effort.
-
-What you can get optionally:
-
-* LUKS
-* EFI secure boot
-* Initramfs (compiled into the kernel for EFIstub)
+* bootable Archlinux with a Initramfs
 * Preconfigured sshd
-* Ansible ready (packages, user, ssh)
+* efibootmgr configured
+
 * Additional packages of your choice (only trivial installations without use flag changes)
 
 What you will **NOT** get: (i.e. you will have to do it yourself)
@@ -47,10 +38,9 @@ which should be suitable for most use-cases (desktop and server installations).
 * Sync time
 * Partition disks
 * Format partitions
-* Download stage3
-* Extract stage3
+* Install archlinux with pacstrap
 * Chroot into new system
-* Update portage tree
+* Update pacman
 * ... TODO MISSING!
 
 #### GPT
@@ -73,19 +63,8 @@ This probably involves the following steps:
 Maybe there will be a convenience script for this at some point.
 No promises though.
 
-# Optional: Ansible ready
-
-Optionally, this script can make the new system ready to be
-used with ansible.
-
-It will do the following steps for you:
-
-* Create an ansible user
-* Generate an ssh keypair (type configurable)
-* Setup a secure sshd (safe ciphers, login only with keypair)
-* Install ansible
 
 # References
 
-* [Sakaki's EFI Install Guide](https://wiki.gentoo.org/wiki/Sakaki%27s_EFI_Install_Guide)
-* [Gentoo AMD64 Handbook](https://wiki.gentoo.org/wiki/Handbook:AMD64)
+* [Initialy forked from nyronium gentoo-bootstrap](https://github.com/nyronium/gentoo-bootstrap)
+* [Arch Wiki Installation Guide](https://wiki.archlinux.org/index.php/installation_guide)
