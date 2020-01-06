@@ -52,12 +52,14 @@ LOCALE="C.utf8"
 # de_DE@euro ISO-8859-15
 # " # End of LOCALES
 # LOCALE="de_DE.utf8"
-
+# LOCALE LANG variable
+LOCALELANG="LANG=C.utf8"
 # The default keymap for the system
 KEYMAP="de-latin1-nodeadkeys"
 #KEYMAP="us"
 
-
+#Hostename
+HOSTNAME="test"
 ################################################
 # Gentoo configuration
 
