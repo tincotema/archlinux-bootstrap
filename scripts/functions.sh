@@ -199,7 +199,8 @@ install_arch() {
 	mkdir "$ROOT_MOUNTPOINT/boot"
 	mount_by_partuuid "$PARTITION_UUID_EFI" "$ROOT_MOUNTPOINT/boot"
 	einfo "Installing Archlinux with base packages"
-	try pacstrap "$ROOT_MOUNTPOINT" dhcpcd git neovim base base-devil man-db man-pages linux linux-firmware
+	try pacstrap "$ROOT_MOUNTPOINT" dhcpcd git neovim base base-devel man-db man-pages linux linux-firmware
+	#TODO export not crucial packages into config
 	einfo "generateing fstab entrys"
 	try genfstab -L "$ROOT_MOUNTPOINT" >> "$ROOT_MOUNTPOINT/etc/fstab"
 	#TODO own fstab generator
@@ -256,6 +257,6 @@ gentoo_chroot() {
 	einfo "Chrooting..."
 	EXECUTED_IN_CHROOT=true \
 		TMP_DIR=$TMP_DIR \
-		exec arch-chroot "$ROOT_MOUNTPOINT" "$GENTOO_BOOTSTRAP_DIR/scripts/main_chroot.sh" "$@" \
+		try exec arch-chroot "$ROOT_MOUNTPOINT" "$GENTOO_BOOTSTRAP_DIR/scripts/main_chroot.sh" "$@" \
 		|| die "Failed to chroot into '$ROOT_MOUNTPOINT'"
 }
