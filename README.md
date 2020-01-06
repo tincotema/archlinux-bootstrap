@@ -8,6 +8,7 @@ See [Install](#Install) for usage instructions.
 
 This script will install a minimal EFI bootable arch system without an X-server.
 It will stick closely to the [Arch Wiki Installation Guide](https://wiki.archlinux.org/index.php/installation_guide)
+It is based on the Install Skript from [nyronium](https://github.com/nyronium/gentoo-bootstrap)
 
 What you will get:
 
@@ -62,6 +63,10 @@ This probably involves the following steps:
 
 Maybe there will be a convenience script for this at some point.
 No promises though.
+
+# Install
+execude install
+execude umount
 
 
 # References
