@@ -64,7 +64,7 @@ main_install_gentoo_in_chroot() {
 	# Set hostname
 	einfo "Selecting hostname"
 	touch_or_die 644 /etc/hostname
-	echo "/hostname=/c\\hostname=\"$HOSTNAME\"" > /etc/hostname \
+	echo "$HOSTNAME" > /etc/hostname \
 		|| die "Could not sed replace in /etc/hostname"
 
 	# Set timezone
@@ -87,7 +87,7 @@ main_install_gentoo_in_chroot() {
 	# Set keymap
 	einfo "Selecting keymap"
 	touch_or_die 644 /etc/vconsole.conf
-	sed -i "/keymap=/c\\$KEYMAP" /etc/vconsole.conf \
+	echo "keymap=$KEYMAP" > /etc/vconsole.conf \
 		|| die "Could not sed replace in /etc/vconsole.conf"
 
 
