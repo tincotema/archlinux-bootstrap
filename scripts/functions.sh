@@ -38,7 +38,6 @@ prepare_installation_environment() {
 	check_has_program ntpd
 	check_has_program partprobe
 	check_has_program python3
-	check_has_program rhash
 	check_has_program sgdisk
 	check_has_program uuidgen
 	check_has_program wget

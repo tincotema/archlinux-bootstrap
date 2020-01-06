@@ -59,7 +59,7 @@ main_install_gentoo_in_chroot() {
 	# Sync pacman
 	einfo "Syncing pacman"
 	try pacman -Sy
-	reflector --latest 200 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+	reflector --verbose --latest 100 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 
 	# Set hostname
 	einfo "Selecting hostname"
@@ -87,7 +87,7 @@ main_install_gentoo_in_chroot() {
 	# Set keymap
 	einfo "Selecting keymap"
 	touch_or_die 644 /etc/vconsole.conf
-	echo "keymap=$KEYMAP" > /etc/vconsole.conf \
+	echo "KEYMAP=$KEYMAP" > /etc/vconsole.conf \
 		|| die "Could not sed replace in /etc/vconsole.conf"
 
 
