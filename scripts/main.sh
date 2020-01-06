@@ -62,14 +62,16 @@ main_install_gentoo_in_chroot() {
 
 	# Set hostname
 	einfo "Selecting hostname"
-	sed -i "/hostname=/c\\hostname=\"$HOSTNAME\"" /etc/hostname \
+	touch_or_die 644 /etc/hostname
+	echo "/hostname=/c\\hostname=\"$HOSTNAME\"" > /etc/hostname \
 		|| die "Could not sed replace in /etc/hostname"
 
 	# Set timezone
 	einfo "Selecting timezone"
-	echo "$TIMEZONE" > /etc/timezone \
-		|| die "Could not write /etc/timezone"
-	try hwclock --systohc
+	ln -sf /usr/share/zoneinfo/"$TIMEZONE" /etc/localtime \
+		|| die "Could not write /etc/localtime"
+	hwclock --systohc \
+		|| die "Could not generate /etc/adjtime"
 
 	# Set locale
 	einfo "Selecting locale"
@@ -77,12 +79,13 @@ main_install_gentoo_in_chroot() {
 		|| die "Could not write /etc/locale.gen"
 	locale-gen \
 		|| die "Could not generate locales"
-	try locale-gen
+	touch_or_die 644 /etc/locale.conf
 	echo "$LOCALELANG" > /etc/locale.conf \
 		|| die "Could not write /etc/locale.conf"
 
 	# Set keymap
 	einfo "Selecting keymap"
+	touch_or_die 644 /etc/vconsole.conf
 	sed -i "/keymap=/c\\$KEYMAP" /etc/vconsole.conf \
 		|| die "Could not sed replace in /etc/vconsole.conf"
 
