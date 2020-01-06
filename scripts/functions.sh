@@ -193,80 +193,19 @@ bind_bootstrap_dir() {
 		|| die "Could not bind mount '$GENTOO_BOOTSTRAP_DIR_ORIGINAL' to '$GENTOO_BOOTSTRAP_BIND'"
 }
 
-download_stage3() {
-	cd "$TMP_DIR" \
-		|| die "Could not cd into '$TMP_DIR'"
 
-	local STAGE3_RELEASES="$GENTOO_MIRROR/releases/amd64/autobuilds/current-$STAGE3_BASENAME/"
-
-	# Download upstream list of files
-	CURRENT_STAGE3="$(download_stdout "$STAGE3_RELEASES")" \
-		|| die "Could not retrieve list of tarballs"
-	# Decode urlencoded strings
-	CURRENT_STAGE3=$(python3 -c 'import sys, urllib.parse; print(urllib.parse.unquote(sys.stdin.read()))' <<< "$CURRENT_STAGE3")
-	# Parse output for correct filename
-	CURRENT_STAGE3="$(grep -o "\"${STAGE3_BASENAME}-[0-9A-Z]*.tar.xz\"" <<< "$CURRENT_STAGE3" \
-		| sort -u | head -1)" \
-		|| die "Could not parse list of tarballs"
-	# Strip quotes
-	CURRENT_STAGE3="${CURRENT_STAGE3:1:-1}"
-	# File to indiciate successful verification
-	CURRENT_STAGE3_VERIFIED="${CURRENT_STAGE3}.verified"
-
-	# Download file if not already downloaded
-	if [[ -e "$CURRENT_STAGE3_VERIFIED" ]]; then
-		einfo "$STAGE3_BASENAME tarball already downloaded and verified"
-	else
-		einfo "Downloading $STAGE3_BASENAME tarball"
-		download "$STAGE3_RELEASES/${CURRENT_STAGE3}" "${CURRENT_STAGE3}"
-		download "$STAGE3_RELEASES/${CURRENT_STAGE3}.DIGESTS.asc" "${CURRENT_STAGE3}.DIGESTS.asc"
-
-		# Import gentoo keys
-		einfo "Importing gentoo gpg key"
-		local GENTOO_GPG_KEY="$TMP_DIR/gentoo-keys.gpg"
-		download "https://gentoo.org/.well-known/openpgpkey/hu/wtktzo4gyuhzu8a4z5fdj3fgmr1u6tob?l=releng" "$GENTOO_GPG_KEY" \
-			|| die "Could not retrieve gentoo gpg key"
-		gpg --quiet --import < "$GENTOO_GPG_KEY" \
-			|| die "Could not import gentoo gpg key"
-
-		# Verify DIGESTS signature
-		einfo "Verifying DIGEST.asc signature"
-		gpg --quiet --verify "${CURRENT_STAGE3}.DIGESTS.asc" \
-			|| die "Signature of '${CURRENT_STAGE3}.DIGESTS.asc' invalid!"
-
-		# Check hashes
-		einfo "Verifying tarball integrity"
-		rhash -P --check <(grep -B 1 'tar.xz$' "${CURRENT_STAGE3}.DIGESTS.asc") \
-			|| die "Checksum mismatch!"
-
-		# Create verification file in case the script is restarted
-		touch_or_die 0644 "$CURRENT_STAGE3_VERIFIED"
-	fi
-}
-
-extract_stage3() {
+install_arch() {
 	mount_root
+	mkdir "$ROOT_MOUNTPOINT/boot"
+	mount_by_partuuid "$PARTITION_UUID_EFI" "$ROOT_MOUNTPOINT/boot"
+	einfo "Installing Archlinux with base packages"
+	try pacstrap "$ROOT_MOUNTPOINT" dhcpcd git neovim base base-devil man-db man-pages linux linux-firmware
+	einfo "generateing fstab entrys"
+	try genfstab -L "$ROOT_MOUNTPOINT" >> "$ROOT_MOUNTPOINT/etc/fstab"
+	#TODO own fstab generator
 
-	[[ -n $CURRENT_STAGE3 ]] \
-		|| die "CURRENT_STAGE3 is not set"
-	[[ -e "$TMP_DIR/$CURRENT_STAGE3" ]] \
-		|| die "stage3 file does not exist"
-
-	# Go to root directory
-	cd "$ROOT_MOUNTPOINT" \
-		|| die "Could not move to '$ROOT_MOUNTPOINT'"
-	# Ensure the directory is empty
-	find . -mindepth 1 -maxdepth 1 -not -name 'lost+found' \
-		| grep -q . \
-		&& die "root directory '$ROOT_MOUNTPOINT' is not empty"
-
-	# Extract tarball
-	einfo "Extracting stage3 tarball"
-	tar xpf "$TMP_DIR/$CURRENT_STAGE3" --xattrs --numeric-owner \
-		|| die "Error while extracting tarball"
-	cd "$TMP_DIR" \
-		|| die "Could not cd into '$TMP_DIR'"
 }
+
 
 gentoo_umount() {
 	if mountpoint -q -- "$ROOT_MOUNTPOINT"; then
@@ -313,28 +252,10 @@ gentoo_chroot() {
 	mount_root
 	bind_bootstrap_dir
 
-	# Copy resolv.conf
-	einfo "Preparing chroot environment"
-	install --mode=0644 /etc/resolv.conf "$ROOT_MOUNTPOINT/etc/resolv.conf" \
-		|| die "Could not copy resolv.conf"
-
-	# Mount virtual filesystems
-	einfo "Mounting virtual filesystems"
-	(
-		mountpoint -q -- "$ROOT_MOUNTPOINT/proc" || mount -t proc /proc "$ROOT_MOUNTPOINT/proc" || exit 1
-		mountpoint -q -- "$ROOT_MOUNTPOINT/tmp"  || mount --rbind /tmp  "$ROOT_MOUNTPOINT/tmp"  || exit 1
-		mountpoint -q -- "$ROOT_MOUNTPOINT/sys"  || {
-			mount --rbind /sys  "$ROOT_MOUNTPOINT/sys" &&
-			mount --make-rslave "$ROOT_MOUNTPOINT/sys"; } || exit 1
-		mountpoint -q -- "$ROOT_MOUNTPOINT/dev"  || {
-			mount --rbind /dev  "$ROOT_MOUNTPOINT/dev" &&
-			mount --make-rslave "$ROOT_MOUNTPOINT/dev"; } || exit 1
-	) || die "Could not mount virtual filesystems"
-
 	# Execute command
 	einfo "Chrooting..."
 	EXECUTED_IN_CHROOT=true \
 		TMP_DIR=$TMP_DIR \
-		exec chroot -- "$ROOT_MOUNTPOINT" "$GENTOO_BOOTSTRAP_DIR/scripts/main_chroot.sh" "$@" \
+		exec arch-chroot "$ROOT_MOUNTPOINT" "$GENTOO_BOOTSTRAP_DIR/scripts/main_chroot.sh" "$@" \
 		|| die "Failed to chroot into '$ROOT_MOUNTPOINT'"
 }

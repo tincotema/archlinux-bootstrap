@@ -33,14 +33,13 @@ mkdir -p "$TMP_DIR"
 ################################################
 # Functions
 
-install_stage3() {
+install_with_pacstrap() {
 	[[ $# == 0 ]] || die "Too many arguments"
 
 	prepare_installation_environment
 	partition_device
 	format_partitions
-	download_stage3
-	extract_stage3
+	install_arch
 }
 
 main_install_gentoo_in_chroot() {
@@ -52,25 +51,24 @@ main_install_gentoo_in_chroot() {
 	passwd -l root \
 		|| die "Could not change root password"
 
-	einfo "Selecting portage mirrors"
-	# TODO mirrorselect
-	# TODO gpg portage sync
-	# TODO additional binary repos
-	# TODO safe dns settings (claranet)
-
 	# Mount efi partition
 	einfo "Mounting efi"
-	mount_by_partuuid "$PARTITION_UUID_EFI" "/boot/efi"
+	mount_by_partuuid "$PARTITION_UUID_EFI" "/boot"
 
-	# Sync portage
-	einfo "Syncing portage tree"
-	try emerge-webrsync
+	# Sync pacman
+	einfo "Syncing pacman"
+	try pacman -Sy
+
+	# Set hostname
+	einfo "Selecting hostname"
+	sed -i "/hostname=/c\\hostname=\"$HOSTNAME\"" /etc/conf.d/hostname \
+		|| die "Could not sed replace in /etc/conf.d/hostname"
 
 	# Set timezone
 	einfo "Selecting timezone"
 	echo "$TIMEZONE" > /etc/timezone \
 		|| die "Could not write /etc/timezone"
-	try emerge -v --config sys-libs/timezone-data
+	try hwclock --systohc
 
 	# Set locale
 	einfo "Selecting locale"
@@ -78,35 +76,31 @@ main_install_gentoo_in_chroot() {
 		|| die "Could not write /etc/locale.gen"
 	locale-gen \
 		|| die "Could not generate locales"
-	try eselect locale set "$LOCALE"
+	try locale-gen
+	echo "$LOCALELANG" > /etc/locale.conf \
+		|| die "Could not write /etc/locale.conf"
 
 	# Set keymap
 	einfo "Selecting keymap"
 	sed -i "/keymap=/c\\$KEYMAP" /etc/conf.d/keymaps \
 		|| die "Could not sed replace in /etc/conf.d/keymaps"
 
-	# Update environment
-	env_update
-
-	# Prepare /etc/portage for autounmask
-	mkdir_or_die 0755 "/etc/portage/package.use"
-	touch_or_die 0644 "/etc/portage/package.use/zz-autounmask"
-	mkdir_or_die 0755 "/etc/portage/package.keywords"
-	touch_or_die 0644 "/etc/portage/package.keywords/zz-autounmask"
-
-	# Install git (for git portage overlays)
-	einfo "Installing git"
-	try emerge --verbose dev-vcs/git
-
-	# Install vanilla kernel, to be able to boot the system.
-	einfo "Installing vanilla kernel"
-	try emerge --verbose sys-kernel/vanilla-kernel
 
 	# Install additional packages, if any.
 	if [[ -n "$ADDITIONAL_PACKAGES" ]]; then
 		einfo "Installing additional packages"
 		emerge --autounmask-continue=y -- $ADDITIONAL_PACKAGES
 	fi
+	#Create boot entry
+	einfo "Creating efi boot entry"
+	local linuxdev
+	linuxdev="$(get_device_by_partuuid "$PARTITION_UUID_LINUX")" \
+		|| die "Could not resolve partition UUID '$PARTITION_UUID_LINUX'"
+	local efidev
+	efidev="$(get_device_by_partuuid "$PARTITION_UUID_EFI")" \
+		|| die "Could not resolve partition UUID '$PARTITION_UUID_EFI'"
+	local efipartnum="${efidev: -1}"
+	try efibootmgr --verbose --create --disk "$PARTITION_DEVICE" --part "$efipartnum" --label "arch" --loader '\vmlinuz-linux' --unicode "root=$linuxdev initrd=\\initramfs-linux.img"
 
 	#create_ansible_user
 	#generate_fresh keys to become mgmnt ansible user
@@ -120,7 +114,7 @@ main_install_gentoo_in_chroot() {
 		ewarn "Root password cleared, set one as soon as possible!"
 	fi
 
-	einfo "Gentoo installation complete."
+	einfo "Archlinux installation complete."
 	einfo "To chroot into the new system, simply execute the provided 'chroot' wrapper."
 	einfo "Otherwise, you may now reboot your system."
 }
@@ -129,7 +123,7 @@ main_install() {
 	[[ $# == 0 ]] || die "Too many arguments"
 
 	gentoo_umount
-	install_stage3
+	install_with_pacstrap
 	gentoo_chroot "$GENTOO_BOOTSTRAP_BIND/scripts/main.sh" install_gentoo_in_chroot
 }
 
