@@ -58,6 +58,7 @@ main_install_gentoo_in_chroot() {
 	# Sync pacman
 	einfo "Syncing pacman"
 	try pacman -Sy
+	reflector --latest 200 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
 
 	# Set hostname
 	einfo "Selecting hostname"
