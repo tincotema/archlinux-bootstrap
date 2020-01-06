@@ -65,8 +65,8 @@ Maybe there will be a convenience script for this at some point.
 No promises though.
 
 # Install
-execude install
-execude umount
+execude bash install  
+execude bash umount
 
 
 # References
