@@ -52,6 +52,7 @@ main_install_gentoo_in_chroot() {
 		|| die "Could not change root password"
 
 	# Mount efi partition
+	mount -t efivarfs efivarfs /sys/firmware/efi/efivars
 	einfo "Mounting efi"
 	mount_by_partuuid "$PARTITION_UUID_EFI" "/boot"
 
