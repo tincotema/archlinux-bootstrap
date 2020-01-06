@@ -253,10 +253,47 @@ gentoo_chroot() {
 	mount_root
 	bind_bootstrap_dir
 
+	# Copy resolv.conf
+	einfo "Preparing chroot environment"
+	install --mode=0644 /etc/resolv.conf "$ROOT_MOUNTPOINT/etc/resolv.conf" \
+		|| die "Could not copy resolv.conf"
+
+	# Mount virtual filesystems
+	einfo "Mounting virtual filesystems"
+	(
+		mountpoint -q -- "$ROOT_MOUNTPOINT/proc" || mount -t proc /proc "$ROOT_MOUNTPOINT/proc" || exit 1
+		mountpoint -q -- "$ROOT_MOUNTPOINT/tmp"  || mount --rbind /tmp  "$ROOT_MOUNTPOINT/tmp"  || exit 1
+		mountpoint -q -- "$ROOT_MOUNTPOINT/sys"  || {
+			mount --rbind /sys  "$ROOT_MOUNTPOINT/sys" &&
+			mount --make-rslave "$ROOT_MOUNTPOINT/sys"; } || exit 1
+				mountpoint -q -- "$ROOT_MOUNTPOINT/dev"  || {
+					mount --rbind /dev  "$ROOT_MOUNTPOINT/dev" &&
+					mount --make-rslave "$ROOT_MOUNTPOINT/dev"; } || exit 1
+	) || die "Could not mount virtual filesystems"
+
 	# Execute command
 	einfo "Chrooting..."
 	EXECUTED_IN_CHROOT=true \
 		TMP_DIR=$TMP_DIR \
-		try exec arch-chroot "$ROOT_MOUNTPOINT" "$GENTOO_BOOTSTRAP_DIR/scripts/main_chroot.sh" "$@" \
+		exec chroot -- "$ROOT_MOUNTPOINT" "$GENTOO_BOOTSTRAP_DIR/scripts/main_chroot.sh" "$@" \
 		|| die "Failed to chroot into '$ROOT_MOUNTPOINT'"
-}
+	}
+#gentoo_chroot() {
+#	if [[ $# -eq 0 ]]; then
+#		gentoo_chroot /bin/bash --init-file <(echo 'init_bash')
+#	fi
+#
+#	[[ $EXECUTED_IN_CHROOT != true ]] \
+#		|| die "Already in chroot"
+#
+#	gentoo_umount
+#	mount_root
+#	bind_bootstrap_dir
+#
+#	# Execute command
+#	einfo "Chrooting..."
+#	EXECUTED_IN_CHROOT=true \
+#		TMP_DIR=$TMP_DIR \
+#		try exec arch-chroot "$ROOT_MOUNTPOINT" "$GENTOO_BOOTSTRAP_DIR/scripts/main_chroot.sh" "$@" \
+#		|| die "Failed to chroot into '$ROOT_MOUNTPOINT'"
+#}
