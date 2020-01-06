@@ -82,8 +82,8 @@ main_install_gentoo_in_chroot() {
 
 	# Set keymap
 	einfo "Selecting keymap"
-	sed -i "/keymap=/c\\$KEYMAP" /etc/conf.d/keymaps \
-		|| die "Could not sed replace in /etc/conf.d/keymaps"
+	sed -i "/keymap=/c\\$KEYMAP" /etc/vconsole.conf \
+		|| die "Could not sed replace in /etc/vconsole.conf"
 
 
 	# Install additional packages, if any.
