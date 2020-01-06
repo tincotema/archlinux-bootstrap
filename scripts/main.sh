@@ -62,8 +62,8 @@ main_install_gentoo_in_chroot() {
 
 	# Set hostname
 	einfo "Selecting hostname"
-	sed -i "/hostname=/c\\hostname=\"$HOSTNAME\"" /etc/conf.d/hostname \
-		|| die "Could not sed replace in /etc/conf.d/hostname"
+	sed -i "/hostname=/c\\hostname=\"$HOSTNAME\"" /etc/hostname \
+		|| die "Could not sed replace in /etc/hostname"
 
 	# Set timezone
 	einfo "Selecting timezone"
