@@ -1,0 +1,11 @@
+to finsih the vim installation execute:
+:UpdateRemotePlugins
+:call dein#install()
+
+for uptdate later:
+:Dein clear-state
+close and reopen vim
+:Dein uptdate
+reopen vim
+finish
+

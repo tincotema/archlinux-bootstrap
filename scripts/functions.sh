@@ -198,7 +198,7 @@ install_arch() {
 	mkdir "$ROOT_MOUNTPOINT/boot"
 	mount_by_partuuid "$PARTITION_UUID_EFI" "$ROOT_MOUNTPOINT/boot"
 	einfo "Installing Archlinux with base packages"
-	try pacstrap "$ROOT_MOUNTPOINT" dhcpcd git neovim base base-devel man-db man-pages reflector efibootmgr linux linux-firmware
+	try pacstrap "$ROOT_MOUNTPOINT" "$ADDITIONAL_PACKAGES" dhcpcd git base base-devel man-db man-pages reflector efibootmgr linux linux-firmware
 	#TODO export not crucial packages into config
 	einfo "generateing fstab entrys"
 	try genfstab -L "$ROOT_MOUNTPOINT" >> "$ROOT_MOUNTPOINT/etc/fstab"
@@ -253,6 +253,7 @@ gentoo_chroot() {
 	bind_bootstrap_dir
 
 	# Copy resolv.conf
+
 	einfo "Preparing chroot environment"
 	install --mode=0644 /etc/resolv.conf "$ROOT_MOUNTPOINT/etc/resolv.conf" \
 		|| die "Could not copy resolv.conf"
@@ -276,23 +277,32 @@ gentoo_chroot() {
 		TMP_DIR=$TMP_DIR \
 		exec chroot -- "$ROOT_MOUNTPOINT" "$GENTOO_BOOTSTRAP_DIR/scripts/main_chroot.sh" "$@" \
 		|| die "Failed to chroot into '$ROOT_MOUNTPOINT'"
-	}
-#gentoo_chroot() {
-#	if [[ $# -eq 0 ]]; then
-#		gentoo_chroot /bin/bash --init-file <(echo 'init_bash')
-#	fi
-#
-#	[[ $EXECUTED_IN_CHROOT != true ]] \
-#		|| die "Already in chroot"
-#
-#	gentoo_umount
-#	mount_root
-#	bind_bootstrap_dir
-#
-#	# Execute command
-#	einfo "Chrooting..."
-#	EXECUTED_IN_CHROOT=true \
-#		TMP_DIR=$TMP_DIR \
-#		try exec arch-chroot "$ROOT_MOUNTPOINT" "$GENTOO_BOOTSTRAP_DIR/scripts/main_chroot.sh" "$@" \
-#		|| die "Failed to chroot into '$ROOT_MOUNTPOINT'"
-#}
+}
+
+bash_configuration() {
+	einfo "load bash configuration with bashcomplet"
+	pacman -S bash-completion
+    cp "$GENTOO_BOOTSTRAP_DIR/configfiles/bash/bash.bashrc" "/etc/bash.bashrc"
+	if $CREATE_USER; then
+		cp "$GENTOO_BOOTSTRAP_DIR/configfiles/bash/.bashrc" "/home/$USER_NAME/.bashrc"
+	fi
+	cp "$GENTOO_BOOTSTRAP_DIR/configfiles/bash/inputrc" "/etc/inputrc"
+	einfo "bash configuration finished"
+}
+
+nvim_configuration() {
+	einfo "load configuration for nvim"
+	pacman -S python-pynvim
+	cp "$GENTOO_BOOTSTRAP_DIR/configfiles/nvim/sysinit.vim" "/etc/xdg/nvim/sysinit.vim"
+	cp "$GENTOO_BOOTSTRAP_DIR/configfiles/nvim/nvimrc.local" "/etc/vim/nvimrc.local"
+	cp "$GENTOO_BOOTSTRAP_DIR/configfiles/nvim/nvimrc.user" "/etc/vim/nvimrc.user"
+	if $CREATE_USER; then
+		try "$GENTOO_BOOTSTRAP_DIR/configfiles/nvim/dein-installer.sh" "/home/$USER_NAME/.config/nvim/dein"
+		cp "$GENTOO_BOOTSTRAP_DIR/configfiles/nvim/NVIM_FINISH_open_with_nvim.txt" "/home/$USER_NAME/NVIM_FINISH_open_with_nvim.txt"
+	fi
+	try "$GENTOO_BOOTSTRAP_DIR/configfiles/nvim/dein-installer.sh" "/root/.config/nvim/dein"
+	cp "$GENTOO_BOOTSTRAP_DIR/configfiles/nvim/NVIM_FINISH_open_with_nvim.txt" "/root/NVIM_FINISH_open_with_nvim.txt"
+	einfo "nvim Installation has to be finished in vim READ NVIM_FINISH_open_with_nvim.txt"
+	sleep 10
+
+}

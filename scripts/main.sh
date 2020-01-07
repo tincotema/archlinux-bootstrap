@@ -91,11 +91,6 @@ main_install_gentoo_in_chroot() {
 		|| die "Could not sed replace in /etc/vconsole.conf"
 
 
-	# Install additional packages, if any.
-	if [[ -n "$ADDITIONAL_PACKAGES" ]]; then
-		einfo "Installing additional packages"
-		emerge --autounmask-continue=y -- $ADDITIONAL_PACKAGES
-	fi
 	#Create boot entry
 	einfo "Creating efi boot entry"
 	local linuxdev
@@ -119,6 +114,18 @@ main_install_gentoo_in_chroot() {
 		ewarn "Root password cleared, set one as soon as possible!"
 	fi
 
+	if $CREATE_USER; then
+		useradd -m -G "$USER_GROUP_ADDITIONAL" "$USER_NAME"
+		einfo "User "$USER_NAME" with additional Groups "$USER_GROOP_ADDITIONAL" added"
+		passwd "$USER_NAME"
+	else
+		ewarn "No User added"
+	fi
+    bash_configuration
+	nvim_configuration
+	if $CREATE_USER; then
+		chown -r "$USER_NAME:users" "/home/$USER_NAME"
+	fi
 	einfo "Archlinux installation complete."
 	einfo "To chroot into the new system, simply execute the provided 'chroot' wrapper."
 	einfo "Otherwise, you may now reboot your system."

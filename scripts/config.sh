@@ -67,5 +67,15 @@ HOSTNAME="test"
 #ACCEPT_KEYWORDS=""
 ACCEPT_KEYWORDS="~amd64"
 
+
 # List of additional packages to install (will be directly passed to emerge)
 ADDITIONAL_PACKAGES="neovim openssh xterm davfs ffmpeg nginx neovim-python-client tree htop alsa-utils vpnc wget tar cmake tmux"
+
+#User create
+CREATE_USER=true
+#username
+USER_NAME="test"
+#additional user groups
+USER_GROUP_ADDITIONAL=""
+
+

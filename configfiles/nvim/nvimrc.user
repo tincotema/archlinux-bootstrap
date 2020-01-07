@@ -1,0 +1,112 @@
+" User configuration file for neovim
+
+
+" ╓───────────╖
+" ║  Plugins  ║
+" ╙───────────╜
+
+" Enable 'dein' plugin manager
+let &runtimepath .= ',' . expand('~/.config/nvim/dein/repos/github.com/Shougo/dein.vim')
+
+if dein#load_state(expand('~/.config/nvim/dein'))
+	call dein#begin(expand('~/.config/nvim/dein'))
+	call dein#add(expand('~/.config/nvim/dein/repos/github.com/Shougo/dein.vim'))
+
+	" syntax
+	call dein#add('Shougo/deoplete.nvim', { 'on_i': 1 })
+	call dein#add('octol/vim-cpp-enhanced-highlight')
+	call dein#add('airblade/vim-gitgutter')
+	call dein#add('gentoo/gentoo-syntax')
+	call dein#add('ntpeters/vim-better-whitespace')
+	"call dein#add('autozimu/LanguageClient-neovim', { 'rev': 'next', 'build': 'bash install.sh' })
+
+	" python checker
+	call dein#add('nvie/vim-flake8')
+
+	" colorschemes and visuals
+	call dein#add('vim-airline/vim-airline')
+	call dein#add('https://gitlab.com/genthree/vim-matter')
+	call dein#add('joshdick/onedark.vim')
+
+	" utils
+	call dein#add('haya14busa/dein-command.vim')
+	call dein#add('kien/ctrlp.vim', { 'on_cmd' : 'CtrlPMRUFiles' })
+	call dein#add('sjl/gundo.vim')
+	call dein#add('tpope/vim-fugitive', { 'on_cmd': [ 'Git', 'Gstatus', 'Gwrite', 'Glog', 'Gcommit', 'Gblame', 'Ggrep', 'Gdiff', ] })
+	call dein#add('scrooloose/nerdtree')
+	call dein#add('Xuyuanp/nerdtree-git-plugin')
+	call dein#add('godlygeek/tabular')
+
+	call dein#add('terryma/vim-multiple-cursors', { 'on_map' : { 'n' : ['<C-n>', '<C-p>'], 'x' : '<C-n>' }})
+	call dein#add('tmhedberg/matchit', { 'on_ft' : 'html' })
+
+	" required
+	call dein#end()
+	call dein#save_state()
+endif
+
+filetype plugin indent on
+syntax enable
+
+
+" ╓───────────╖
+" ║  General  ║
+" ╙───────────╜
+
+" Set color scheme
+colorscheme onedark
+
+" Some cpp syntax keywords TODO separate enums, concepts, class definitions, namespaces, exceptions
+syntax keyword Constant in
+syntax keyword Constant out
+syntax keyword Constant err
+
+
+" ╓────────────────────────╖
+" ║  Plugin Configuration  ║
+" ╙────────────────────────╜
+
+" airline settings
+let g:airline#extensions#whitespace#checks = [ 'trailing' ]
+let g:airline_powerline_fonts = 1
+let g:airline_theme = 'onedark'
+
+" enable deoplete
+let g:deoplete#enable_at_startup = 1
+
+" language server
+"let g:LanguageClient_serverCommands = {
+"    \ }
+
+" open NERDTree automatically if no arguments are given
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+
+" delete buffers for files deleted with NERDTree
+let NERDTreeAutoDeleteBuffer = 1
+
+
+" ╓────────────╖
+" ║  Mappings  ║
+" ╙────────────╜
+
+" NERDTree
+nnoremap <Leader>f :NERDTreeToggle<Enter>
+nnoremap <silent> <Leader>v :NERDTreeFind<CR>
+
+"nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
+"nnoremap <silent> gd :call LanguageClient#textDocument_definition()<CR>
+"nnoremap <silent> <F2> :call LanguageClient#textDocument_rename()<CR>
+
+" Tabularize
+nnoremap <Leader>a= :Tabularize /=<CR>
+vnoremap <Leader>a= :Tabularize /=<CR>
+nnoremap <Leader>a, :Tabularize /,\zs<CR>
+vnoremap <Leader>a, :Tabularize /,\zs<CR>
+
+" remap Ctrl-Space to deoplete autocomplete
+inoremap <silent><expr> <C-Space> deoplete#manual_complete()
+
+" call make and open quickfix windows on F5
+command -nargs=* Make make :make <args> | cwindow
+autocmd FileType cpp map <F5> :Make<CR><CR>

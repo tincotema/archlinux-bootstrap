@@ -1,0 +1,134 @@
+" Default genthree configuration file for neovim
+
+" You can override any of these settings on a global basis via the
+" "/etc/vim/nvimrc.user" file, and on a per-user basis via
+" "~/.config/nvim/init.vim". You may need to create these files.
+
+
+" ╓───────────╖
+" ║  General  ║
+" ╙───────────╜
+
+" Set maximum undo levels
+set undolevels=1000000
+
+" Allow to hide buffers with unsaved changes (e.g. closing the split)
+set hidden
+
+
+" Ignore *.o and *~ files in wildmenu
+set wildignore=*.o,*~
+
+" Only complete the longest common prefix and list all results.
+" You can use the cursor keys to select an item in this list
+set wildmode=list:full
+
+
+" Set foldmethod to syntax
+" [ now finally fast ??? ] setlocal foldmethod=syntax
+
+
+" ╓──────────────────╖
+" ║  Editor visuals  ║
+" ╙──────────────────╜
+
+" Enable true color in terminals
+set termguicolors
+
+" Do not wrap text longer than the window's width
+set nowrap
+
+" Show line numbers
+set number
+
+" Keep 2 lines above and below the cursor.
+set scrolloff=2
+
+" Keep 2 lines left and right of the cursor.
+set sidescrolloff=2
+
+" Set indentation of tabs to be equal to 4 spaces.
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+
+
+" ╓────────────────────╖
+" ║  Editing behavior  ║
+" ╙────────────────────╜
+
+" r = insert comment leader when hitting <Enter> in insert mode
+" q = allow explicit formatting with gq
+" j = remove comment leaders when joining lines if it makes sense
+set formatoptions=rqj
+
+" Allow the curser to be positioned on cells that have no actual character;
+" Like moving beyond EOL or on any visual 'space' of a tab character
+set virtualedit=all
+
+" Do not include line ends in past the-line selections
+set selection=old
+
+" Use smart auto indenting for all file types
+set smartindent
+
+" Only wait 20 milliseconds for characters to arrive (see :help timeout)
+set timeoutlen=20
+set ttimeoutlen=20
+
+" Disable timeout, set ttimeout (only timeout on keycodes)
+set notimeout
+set ttimeout
+
+
+" ╓───────────────────╖
+" ║  Search behavior  ║
+" ╙───────────────────╜
+
+" Ignore search case unless an upper case character is included
+set ignorecase
+set smartcase
+
+
+" ╓────────────╖
+" ║  Mappings  ║
+" ╙────────────╜
+
+let mapleader=','
+
+" Remap print to <Del>
+inoremap <t_%9> <Del>
+
+" Remove Ctrl + U and Ctrl + W in insert mode (which did bad things)
+inoremap  <nop>
+inoremap  <nop>
+
+
+" Scroll with cursor locked to file position
+noremap <S-Down> 
+noremap <S-Up> 
+noremap! <S-Down> a
+noremap! <S-Up> a
+
+" Alt + arrow keys change the current window
+noremap <M-Down> <Down>
+noremap <M-Up> <Up>
+noremap <M-Left> <Left>
+noremap <M-Right> <Right>
+
+
+" <F3> = insert current date and time
+inoremap <F3> <C-R>=strftime("%d.%m.%Y %H:%M:%S")<CR>a
+
+" Alias fold to Shift + <Left>
+map <s-Left> za
+
+
+" ╓───────────────╖
+" ║  User nvimrc  ║
+" ╙───────────────╜
+
+" Source global nvimrc.user
+if filereadable("/etc/vim/nvimrc.user")
+	source /etc/vim/nvimrc.user
+endif
