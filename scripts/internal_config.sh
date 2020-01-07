@@ -17,4 +17,4 @@ GENTOO_BOOTSTRAP_BIND="$TMP_DIR/bind"
 UUID_STORAGE_DIR="$TMP_DIR/uuids"
 
 # The desired efi partition mountpoint for the actual system
-EFI_MOUNTPOINT="/boot/efi"
+EFI_MOUNTPOINT="/boot"
