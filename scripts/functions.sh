@@ -198,7 +198,7 @@ install_arch() {
 	mkdir "$ROOT_MOUNTPOINT/boot"
 	mount_by_partuuid "$PARTITION_UUID_EFI" "$ROOT_MOUNTPOINT/boot"
 	einfo "Installing Archlinux with base packages"
-	try pacstrap "$ROOT_MOUNTPOINT" "$ADDITIONAL_PACKAGES" dhcpcd git base base-devel man-db man-pages reflector efibootmgr linux linux-firmware
+	try pacstrap "$ROOT_MOUNTPOINT" $ADDITIONAL_PACKAGES dhcpcd git base base-devel man-db man-pages reflector efibootmgr linux linux-firmware
 	#TODO export not crucial packages into config
 	einfo "generateing fstab entrys"
 	try genfstab -L "$ROOT_MOUNTPOINT" >> "$ROOT_MOUNTPOINT/etc/fstab"
@@ -217,7 +217,6 @@ gentoo_umount() {
 
 init_bash() {
 	source /etc/profile
-	umask 0077
 	export PS1='(chroot) [0;31m\u[1;31m@\h [1;34m\w [m\$ [m'
 }; export -f init_bash
 
@@ -226,7 +225,6 @@ env_update() {
 		|| die "Error in env-update"
 	source /etc/profile \
 		|| die "Could not source /etc/profile"
-	umask 0077
 }
 
 mkdir_or_die() {

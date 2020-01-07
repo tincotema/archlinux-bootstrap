@@ -19,7 +19,6 @@ export GENTOO_BOOTSTRAP_DIR="$GENTOO_BOOTSTRAP_DIR_ORIGINAL"
 export GENTOO_BOOTSTRAP_SCRIPT_ACTIVE=true
 export GENTOO_BOOTSTRAP_SCRIPT_PID=$$
 
-umask 0077
 
 source "$GENTOO_BOOTSTRAP_DIR/scripts/utils.sh"
 source "$GENTOO_BOOTSTRAP_DIR/scripts/config.sh"
@@ -115,7 +114,7 @@ main_install_gentoo_in_chroot() {
 	fi
 
 	if $CREATE_USER; then
-		useradd -m -G "$USER_GROUP_ADDITIONAL" "$USER_NAME"
+		useradd -m -g users -G "$USER_GROUP_ADDITIONAL" "$USER_NAME"
 		einfo "User "$USER_NAME" with additional Groups "$USER_GROOP_ADDITIONAL" added"
 		passwd "$USER_NAME"
 	else
@@ -124,7 +123,7 @@ main_install_gentoo_in_chroot() {
     bash_configuration
 	nvim_configuration
 	if $CREATE_USER; then
-		chown -r "$USER_NAME:users" "/home/$USER_NAME"
+		chown -R "$USER_NAME:users" "/home/$USER_NAME"
 	fi
 	einfo "Archlinux installation complete."
 	einfo "To chroot into the new system, simply execute the provided 'chroot' wrapper."
