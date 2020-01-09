@@ -151,6 +151,17 @@ main_install_gentoo_in_chroot() {
 			|| die "Could not append to /etc/ssh/sshd_config"
 	fi
 
+    echo "Defaults rootpw" >> /etc/sudoers \
+		|| die "Could not append 'Defaults rootpw to /etc/sudoers"
+    if [[ "$INSTALL_ANSIBLE" == true ]]; then
+		echo "ansible ALL=(ALL)ALL" \
+			|| die "Could not append 'ansible ALL=(ALL)ALL' to /etc/sudoers"
+	fi
+    if [[ "$CREATE_USER" == true ]]; then
+		echo "$USER_NAME ALL=(ALL)ALL" \
+			|| die "Could not append '$USER_NAME ALL=(ALL)ALL' to /etc/sudoers"
+	fi
+
 	if [[ "$INSTALL_YAY" == true && ( "$CREATE_USER" == true || "$INSTALL_ANSIBLE" == true ) ]]; then
 		einfo "installing YAY"
 		if [[ "$CREATE_USER" == true ]]; then
