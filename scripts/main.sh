@@ -160,7 +160,7 @@ main_install_gentoo_in_chroot() {
 			git clone https://aur.archlinux.org/yay.git
 			cd yay \
 				|| die "Could not cd in yay"
-			sudo -U "USER_NAME" makepkg -si
+			sudo -u "USER_NAME" makepkg -si
 		elif [[ "$INSTALL_ANSIBLE" == true ]]; then
 			einfo "installing wiht user ansible"
 			cd "$TMP_DIR" \
@@ -168,7 +168,7 @@ main_install_gentoo_in_chroot() {
 			git clone https://aur.archlinux.org/yay.git
 			cd yay \
 				|| die "Could not cd in yay"
-			sudo -U ansible makepkg -si
+			sudo -u ansible makepkg -si
 		fi
 	fi
 
