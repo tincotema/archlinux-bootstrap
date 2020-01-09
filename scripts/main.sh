@@ -164,6 +164,7 @@ main_install_gentoo_in_chroot() {
 
 	if [[ "$INSTALL_YAY" == true && ( "$CREATE_USER" == true || "$INSTALL_ANSIBLE" == true ) ]]; then
 		einfo "installing YAY"
+		pacman --noconfirm -S go
 		if [[ "$CREATE_USER" == true ]]; then
 			einfo "installing with user $USER_NAME"
 			cd "$TMP_DIR" \
