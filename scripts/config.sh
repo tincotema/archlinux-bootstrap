@@ -78,4 +78,27 @@ USER_NAME="test"
 #additional user groups
 USER_GROUP_ADDITIONAL=""
 
+# install ssh key for user
+INSTALL_SSHD_FOR_USER=true
 
+# ssh key for ansible user
+# This varible will become the content of the .auhtorized_key file,
+# so you may specify one key per line.
+
+
+# install YAY as aur package manager
+INSTALL_YAY=true
+
+################################################
+# Ansible cofiguration
+
+# install Ansible
+INSTALL_ANSIBLE=false
+
+#ansible home directly
+ANSIBLE_HOME=/var/lib/ansible
+
+# ssh key for ansible user
+# This varible will become the content of the .auhtorized_key file,
+# so you may specify one key per line.
+ANSIBLE_SSH_AUTHORIZED_KEYS=""

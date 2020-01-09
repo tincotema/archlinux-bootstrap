@@ -101,17 +101,6 @@ main_install_gentoo_in_chroot() {
 	local efipartnum="${efidev: -1}"
 	try efibootmgr --verbose --create --disk "$PARTITION_DEVICE" --part "$efipartnum" --label "arch" --loader '\vmlinuz-linux' --unicode "root=$linuxdev initrd=\\initramfs-linux.img"
 
-	#create_ansible_user
-	#generate_fresh keys to become mgmnt ansible user
-	#install_ansible
-
-	if ask "Do you want to assign a root password now?"; then
-		passwd root
-		einfo "Root password assigned"
-	else
-		passwd -d root
-		ewarn "Root password cleared, set one as soon as possible!"
-	fi
 
 	if $CREATE_USER; then
 		useradd -m -g users -G "$USER_GROUP_ADDITIONAL" "$USER_NAME"
@@ -120,14 +109,95 @@ main_install_gentoo_in_chroot() {
 	else
 		ewarn "No User added"
 	fi
+
+    # install bash config
     bash_configuration
+
+	#instll nvim config
 	nvim_configuration
-	if $CREATE_USER; then
-		chown -R "$USER_NAME:users" "/home/$USER_NAME"
+
+
+    if $INSTALL_SSHD_FOR_USER|| $INSTALL_ANSIBLE; then
+		einfo "enable SSHD"
+		cp "$GENTOO_BOOTSTRAP_DIR/configfiles/ssh/sshd_config" "/etc/ssh/sshd_config"
+		systemctl enable sshd.service
+		if $INSTALL_SSHD_USER;then
+			einfo "Adding authorized key for $USER_NAME"
+			mkdir_or_dir "/home/$USER_NAME/.ssh"
+			echo "$USER_SSH_AUTHORIZED_KEY" >> "/home/$USER_NAME/.ssh/authorized_keys" \
+				|| die "Could not add ssh key to authorized_keys"
+
+			einfo "Allowing $USER_NAME for ssh"
+			echo "ALLowUsers $USER_NAME" >> "/etc/ssh/sshdconfig" \
+				|| die "Could not append to /etc/ssh/sshd_config"
+		fi
 	fi
+
+
+	# create_ansible_user
+	# and install_ansible
+    if $INSTALL_ANSIBLE; then
+		einfo "Installing Ansible"
+		pacman --noconfirm -S ansible
+		useradd -r -d "$ANSIBLE_HOME" ansible
+		if $INSTALL_ANSIBLE;then
+			einfo "Adding authorized key for Ansible"
+			mkdir_or_dir "$ANSIBLE_HOME/.ssh"
+			echo "$ANSIBLE_SSH_AUTHORIZED_KEYS" >> "$ANSIBLE_HOME/.ssh/authorized_keys" \
+				|| die "Could not add ssh key to authorized_keys"
+		fi
+
+		einfo "Allowing ansible for ssh"
+		echo "ALLowUsers ansible" >> "/etc/ssh/sshdconfig" \
+			|| die "Could not append to /etc/ssh/sshd_config"
+	fi
+
+    if $INSTALL_YAY && [$CREATE_USER || $INSTALL_ANSIBLE]; then
+		einfo "installing YAY"
+		if $CREATE_USER; then
+			einfo "installing with user $USER_NAME"
+			cd "$TMP_DIR"
+			git clone https://aur.archlinux.org/yay.git
+			cd yay
+			sudo "USER_NAME" makepkg -si
+		fi
+		if $INSTALL_ANSIBLE; then
+			einfo "installing wiht user ansible"
+			cd "$TMP_DIR"
+			git clone https://aur.archlinux.org/yay.git
+			cd yay
+			sudo ansible makepkg -si
+		fi
+	fi
+
+
+
+
+
+	#ask for root password
+	if ask "Do you want to assign a root password now?"; then
+		passwd root
+		einfo "Root password assigned"
+	else
+		passwd -d root
+		ewarn "Root password cleared, set one as soon as possible!"
+	fi
+
+	# making shure everything in /home/user is onwed by user
+	if $CREATE_USER; then
+		chown -R "$USER_NAME:users" "/home/$USER_NAME" \
+			|| die "Could not change onwership of $USER_NAME home"
+	fi
+
+	if $INSTALL_ANSIBLE; then
+		chown -R ansible: "$ANSIBLE_HOME" \
+			|| die "Could not change onwership of ansible home"
+	fi
+
 	einfo "Archlinux installation complete."
 	einfo "To chroot into the new system, simply execute the provided 'chroot' wrapper."
 	einfo "Otherwise, you may now reboot your system."
+
 }
 
 main_install() {

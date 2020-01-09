@@ -279,7 +279,7 @@ gentoo_chroot() {
 
 bash_configuration() {
 	einfo "load bash configuration with bashcomplet"
-	pacman -S bash-completion
+	pacman --noconfirm -S bash-completion
     cp "$GENTOO_BOOTSTRAP_DIR/configfiles/bash/bash.bashrc" "/etc/bash.bashrc"
 	if $CREATE_USER; then
 		cp "$GENTOO_BOOTSTRAP_DIR/configfiles/bash/.bashrc" "/home/$USER_NAME/.bashrc"
@@ -290,7 +290,7 @@ bash_configuration() {
 
 nvim_configuration() {
 	einfo "load configuration for nvim"
-	pacman -S python-pynvim
+	pacman --noconfirm -S python-pynvim
 	cp "$GENTOO_BOOTSTRAP_DIR/configfiles/nvim/sysinit.vim" "/etc/xdg/nvim/sysinit.vim"
 	cp "$GENTOO_BOOTSTRAP_DIR/configfiles/nvim/nvimrc.local" "/etc/vim/nvimrc.local"
 	cp "$GENTOO_BOOTSTRAP_DIR/configfiles/nvim/nvimrc.user" "/etc/vim/nvimrc.user"
