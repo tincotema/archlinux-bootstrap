@@ -63,11 +63,6 @@ HOSTNAME="test"
 ################################################
 # Arch configuration
 
-# Default accept keywords (enable testing by default)
-#ACCEPT_KEYWORDS=""
-ACCEPT_KEYWORDS="~amd64"
-
-
 # List of additional packages to install (will be directly passed to emerge)
 ADDITIONAL_PACKAGES="neovim openssh xterm davfs2 ffmpeg nginx tree htop alsa-utils vpnc wget tar cmake tmux"
 
@@ -84,7 +79,7 @@ INSTALL_SSHD_FOR_USER=true
 # ssh key for ansible user
 # This varible will become the content of the .auhtorized_key file,
 # so you may specify one key per line.
-
+USER_SSH_AUTHORIZED_KEYS="test"
 
 # install YAY as aur package manager
 INSTALL_YAY=true
@@ -93,7 +88,7 @@ INSTALL_YAY=true
 # Ansible cofiguration
 
 # install Ansible
-INSTALL_ANSIBLE=false
+INSTALL_ANSIBLE=true
 
 #ansible home directly
 ANSIBLE_HOME=/var/lib/ansible
@@ -101,4 +96,4 @@ ANSIBLE_HOME=/var/lib/ansible
 # ssh key for ansible user
 # This varible will become the content of the .auhtorized_key file,
 # so you may specify one key per line.
-ANSIBLE_SSH_AUTHORIZED_KEYS=""
+ANSIBLE_SSH_AUTHORIZED_KEYS="test"

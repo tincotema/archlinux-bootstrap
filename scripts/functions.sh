@@ -301,6 +301,6 @@ nvim_configuration() {
 	try "$GENTOO_BOOTSTRAP_DIR/configfiles/nvim/dein-installer.sh" "/root/.config/nvim/dein"
 	cp "$GENTOO_BOOTSTRAP_DIR/configfiles/nvim/NVIM_FINISH_open_with_nvim.txt" "/root/NVIM_FINISH_open_with_nvim.txt"
 	einfo "nvim Installation has to be finished in vim READ NVIM_FINISH_open_with_nvim.txt"
-	sleep 10
+	countdown "REMEMBER FINISHING THE INSTALATION LATER" 5
 
 }
