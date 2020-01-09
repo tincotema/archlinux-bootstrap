@@ -168,7 +168,9 @@ main_install_gentoo_in_chroot() {
 			einfo "installing with user $USER_NAME"
 			cd "$TMP_DIR" \
 				|| die "Could not cd in TMP_DIR"
-			git clone https://aur.archlinux.org/yay.git
+			try git clone https://aur.archlinux.org/yay.git
+			chown -R "$USER_NAME:users" yay \
+				|| die "Could not change onwership of yay"
 			einfo "cloned"
 			cd yay \
 				|| die "Could not cd in yay"
@@ -177,7 +179,9 @@ main_install_gentoo_in_chroot() {
 			einfo "installing wiht user ansible"
 			cd "$TMP_DIR" \
 				|| die "Could not cd in TMP_DIR"
-			git clone https://aur.archlinux.org/yay.git
+			try git clone https://aur.archlinux.org/yay.git
+			chown -R ansible: yay \
+				|| die "Could not change onwership of yay"
 			cd yay \
 				|| die "Could not cd in yay"
 			sudo -u ansible makepkg -si
