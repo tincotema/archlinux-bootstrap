@@ -198,7 +198,7 @@ install_arch() {
 	mkdir "$ROOT_MOUNTPOINT/boot"
 	mount_by_partuuid "$PARTITION_UUID_EFI" "$ROOT_MOUNTPOINT/boot"
 	einfo "Installing Archlinux with base packages"
-	try pacstrap "$ROOT_MOUNTPOINT" $ADDITIONAL_PACKAGES dhcpcd git base base-devel man-db man-pages reflector efibootmgr linux linux-firmware
+	try pacstrap "$ROOT_MOUNTPOINT" $ADDITIONAL_PACKAGES neovim openssh dhcpcd git base base-devel man-db man-pages reflector efibootmgr linux linux-firmware
 	#TODO export not crucial packages into config
 	einfo "generateing fstab entrys"
 	try genfstab -L "$ROOT_MOUNTPOINT" >> "$ROOT_MOUNTPOINT/etc/fstab"

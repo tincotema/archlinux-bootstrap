@@ -121,7 +121,7 @@ main_install_gentoo_in_chroot() {
 		einfo "enable SSHD"
 		cp "$GENTOO_BOOTSTRAP_DIR/configfiles/ssh/sshd_config" "/etc/ssh/sshd_config"
 		systemctl enable sshd.service
-		if [[ "$INSTALL_SSHD_USER" == true ]];then
+		if [[ "$INSTALL_SSHD_FOR_USER" == true ]];then
 			einfo "Adding authorized key for $USER_NAME"
 			mkdir_or_die 0700 "/home/$USER_NAME/.ssh"
 			echo "$USER_SSH_AUTHORIZED_KEY" >> "/home/$USER_NAME/.ssh/authorized_keys" \

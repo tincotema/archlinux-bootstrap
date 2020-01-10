@@ -64,7 +64,7 @@ HOSTNAME="test"
 # Arch configuration
 
 # List of additional packages to install (will be directly passed to emerge)
-ADDITIONAL_PACKAGES="neovim openssh xterm davfs2 ffmpeg nginx tree htop alsa-utils vpnc wget tar cmake tmux"
+ADDITIONAL_PACKAGES="xterm davfs2 ffmpeg nginx tree htop alsa-utils vpnc wget tar cmake tmux"
 
 #User create
 CREATE_USER=true
