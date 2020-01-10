@@ -128,14 +128,13 @@ main_install_gentoo_in_chroot() {
 				|| die "Could not add ssh key to authorized_keys"
 
 			einfo "Allowing $USER_NAME for ssh"
-			echo "ALLowUsers $USER_NAME" >> "/etc/ssh/sshdconfig" \
+			echo "AllowUsers $USER_NAME" >> "/etc/ssh/sshd_config" \
 				|| die "Could not append to /etc/ssh/sshd_config"
 		fi
 	fi
 
 
-	# create_ansible_user
-	# and install_ansible
+	# create and install_ansible(user)
     if [[ "$INSTALL_ANSIBLE" == true ]]; then
 		einfo "Installing Ansible"
 		pacman --noconfirm -S ansible
@@ -147,47 +146,26 @@ main_install_gentoo_in_chroot() {
 			|| die "Could not add ssh key to authorized_keys"
 
 		einfo "Allowing ansible for ssh"
-		echo "ALLowUsers ansible" >> "/etc/ssh/sshdconfig" \
+		echo "AllowUsers ansible" >> "/etc/ssh/sshd_config" \
 			|| die "Could not append to /etc/ssh/sshd_config"
 	fi
 
     echo "Defaults rootpw" >> /etc/sudoers \
 		|| die "Could not append 'Defaults rootpw to /etc/sudoers"
     if [[ "$INSTALL_ANSIBLE" == true ]]; then
-		echo "ansible ALL=(ALL)ALL" \
+		echo "ansible ALL=(ALL)ALL" >> /etc/sudoers \
 			|| die "Could not append 'ansible ALL=(ALL)ALL' to /etc/sudoers"
 	fi
     if [[ "$CREATE_USER" == true ]]; then
-		echo "$USER_NAME ALL=(ALL)ALL" \
+		echo "$USER_NAME ALL=(ALL)ALL" >> /etc/sudoers \
 			|| die "Could not append '$USER_NAME ALL=(ALL)ALL' to /etc/sudoers"
 	fi
-
+    # Installing yay
 	if [[ "$INSTALL_YAY" == true && ( "$CREATE_USER" == true || "$INSTALL_ANSIBLE" == true ) ]]; then
-		einfo "installing YAY"
-		pacman --noconfirm -S go
 		if [[ "$CREATE_USER" == true ]]; then
-			einfo "installing with user $USER_NAME"
-			cd "$TMP_DIR" \
-				|| die "Could not cd in TMP_DIR"
-			try git clone https://aur.archlinux.org/yay.git
-			chown -R "$USER_NAME:users" yay \
-				|| die "Could not change onwership of yay"
-			einfo "cloned"
-			cd yay \
-				|| die "Could not cd in yay"
-			sudo -u "$USER_NAME" makepkg
-			pacman --noconfirm -U yay*.tar.xz
+			yay_install $USER_NAME
 		elif [[ "$INSTALL_ANSIBLE" == true ]]; then
-			einfo "installing wiht user ansible"
-			cd "$TMP_DIR" \
-				|| die "Could not cd in TMP_DIR"
-			try git clone https://aur.archlinux.org/yay.git
-			chown -R ansible: yay \
-				|| die "Could not change onwership of yay"
-			cd yay \
-				|| die "Could not cd in yay"
-			sudo -u ansible makepkg
-			pacman --noconfirm -U yay*.tar.xz
+			yay_install ansible
 		fi
 	fi
 
@@ -206,7 +184,7 @@ main_install_gentoo_in_chroot() {
 
 	# making shure everything in /home/user is onwed by user
 	if [[ "$CREATE_USER" == true ]]; then
-		chown -R "$USER_NAME:users" "/home/$USER_NAME" \
+		chown -R "$USER_NAME:" "/home/$USER_NAME" \
 			|| die "Could not change onwership of $USER_NAME home"
 	fi
 

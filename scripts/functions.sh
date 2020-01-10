@@ -304,3 +304,19 @@ nvim_configuration() {
 	countdown "REMEMBER FINISHING THE INSTALATION LATER " 5
 
 }
+
+yay_install() {
+	einfo "installing YAY"
+	pacman --noconfirm -S go
+	einfo "installing with user $1"
+	cd "$TMP_DIR" \
+		|| die "Could not cd in TMP_DIR"
+	try git clone https://aur.archlinux.org/yay.git
+	chown -R "$1:" yay \
+		|| die "Could not change onwership of yay"
+	einfo "cloned"
+	cd yay \
+		|| die "Could not cd in yay"
+	sudo -u "$1" makepkg
+	pacman --noconfirm -U yay*.tar.xz
+}
