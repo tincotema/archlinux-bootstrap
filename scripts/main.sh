@@ -24,6 +24,9 @@ source "$GENTOO_BOOTSTRAP_DIR/scripts/utils.sh"
 source "$GENTOO_BOOTSTRAP_DIR/scripts/config.sh"
 source "$GENTOO_BOOTSTRAP_DIR/scripts/functions.sh"
 
+[[ $I_HAVE_READ_AND_EDITED_THE_CONFIG_PROPERLY == true ]] \
+	|| die "you have not properly read the config. Set I_HAVE_READ_AND_EDITED_THE_CONFIG_PROPERLY=true to continue."
+
 mkdir -p "$TMP_DIR"
 [[ $EUID == 0 ]] \
 	|| die "Must be root"

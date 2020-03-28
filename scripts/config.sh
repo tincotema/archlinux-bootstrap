@@ -59,7 +59,7 @@ KEYMAP="de-latin1-nodeadkeys"
 #KEYMAP="us"
 
 #Hostename
-HOSTNAME="test"
+HOSTNAME=""
 ################################################
 # Arch configuration
 
@@ -67,28 +67,30 @@ HOSTNAME="test"
 ADDITIONAL_PACKAGES="xterm davfs2 ffmpeg nginx tree htop alsa-utils vpnc wget tar cmake tmux"
 
 #User create
-CREATE_USER=true
+CREATE_USER=false
 #username
-USER_NAME="test"
+USER_NAME=""
 #additional user groups
 USER_GROUP_ADDITIONAL=""
 
 # install ssh key for user
-INSTALL_SSHD_FOR_USER=true
+INSTALL_SSHD_FOR_USER=false
 
 # ssh key for ansible user
 # This varible will become the content of the .auhtorized_key file,
 # so you may specify one key per line.
-USER_SSH_AUTHORIZED_KEYS="test"
+USER_SSH_AUTHORIZED_KEYS=""
 
 # install YAY as aur package manager
-INSTALL_YAY=true
+# due to right managment it is necesary
+# to have a user in order to install yay
+INSTALL_YAY=false
 
 ################################################
 # Ansible cofiguration
 
 # install Ansible
-INSTALL_ANSIBLE=true
+INSTALL_ANSIBLE=false
 
 #ansible home directly
 ANSIBLE_HOME=/var/lib/ansible
@@ -96,4 +98,11 @@ ANSIBLE_HOME=/var/lib/ansible
 # ssh key for ansible user
 # This varible will become the content of the .auhtorized_key file,
 # so you may specify one key per line.
-ANSIBLE_SSH_AUTHORIZED_KEYS="test"
+ANSIBLE_SSH_AUTHORIZED_KEYS="false"
+
+################################################
+# Prove that you have read the config
+
+# To prove that you have read and edited the config
+# properly, set the following value to true.
+I_HAVE_READ_AND_EDITED_THE_CONFIG_PROPERLY=false
