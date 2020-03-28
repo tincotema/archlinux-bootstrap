@@ -102,25 +102,23 @@ main_install_gentoo_in_chroot() {
 	try efibootmgr --verbose --create --disk "$PARTITION_DEVICE" --part "$efipartnum" --label "arch" --loader '\vmlinuz-linux' --unicode "root=$linuxdev initrd=\\initramfs-linux.img"
 
 
-	if [[ "$CREATE_USER" == true ]]; then
-		useradd -m -g users -G "$USER_GROUP_ADDITIONAL" "$USER_NAME"
-		einfo "User $USER_NAME with additional Groups $USER_GROOP_ADDITIONAL added"
-		passwd "$USER_NAME"
-	else
-		ewarn "No User added"
-	fi
 
-    # install bash config
-    bash_configuration
-
-	#instll nvim config
-	nvim_configuration
-
-
+    # install ssh
     if [[ "$INSTALL_SSHD_FOR_USER" == true || "$INSTALL_ANSIBLE" == true ]]; then
 		einfo "enable SSHD"
 		cp "$GENTOO_BOOTSTRAP_DIR/configfiles/ssh/sshd_config" "/etc/ssh/sshd_config"
 		systemctl enable sshd.service
+		groupadd -R sshusers \
+			|| die "could not create group sshusers"
+	fi
+
+
+
+    # add user
+	if [[ "$CREATE_USER" == true ]]; then
+		useradd -m -g users -G "$USER_GROUP_ADDITIONAL" "$USER_NAME"
+		einfo "User $USER_NAME with additional Groups $USER_GROOP_ADDITIONAL added"
+		passwd "$USER_NAME"
 		if [[ "$INSTALL_SSHD_FOR_USER" == true ]];then
 			einfo "Adding authorized key for $USER_NAME"
 			mkdir_or_die 0700 "/home/$USER_NAME/.ssh"
@@ -128,28 +126,41 @@ main_install_gentoo_in_chroot() {
 				|| die "Could not add ssh key to authorized_keys"
 
 			einfo "Allowing $USER_NAME for ssh"
-			echo "AllowUsers $USER_NAME" >> "/etc/ssh/sshd_config" \
-				|| die "Could not append to /etc/ssh/sshd_config"
+			usermod -a -G sshusers "$USER_NAME" \
+				|| die "Could not add $USER_NAME to sshusers Group"
 		fi
+	else
+		ewarn "No User added"
 	fi
+
+
+
+    # install bash config
+    bash_configuration
+
+
+
+	#instll nvim config
+	nvim_configuration
+
 
 
 	# create and install_ansible(user)
     if [[ "$INSTALL_ANSIBLE" == true ]]; then
 		einfo "Installing Ansible"
 		pacman --noconfirm -S ansible
-		useradd -r -d "$ANSIBLE_HOME" -s /bin/bash ansible
+		useradd -r -d "$ANSIBLE_HOME" -G sshusers -s /bin/bash ansible \
+			|| die "Failed to create ansable user"
 		einfo "Adding authorized key for Ansible"
 		mkdir_or_die 0700 "$ANSIBLE_HOME"
 		mkdir_or_die 0700 "$ANSIBLE_HOME/.ssh"
 		echo "$ANSIBLE_SSH_AUTHORIZED_KEYS" >> "$ANSIBLE_HOME/.ssh/authorized_keys" \
 			|| die "Could not add ssh key to authorized_keys"
-
-		einfo "Allowing ansible for ssh"
-		echo "AllowUsers ansible" >> "/etc/ssh/sshd_config" \
-			|| die "Could not append to /etc/ssh/sshd_config"
 	fi
 
+
+
+    # sudoers config
     echo "Defaults rootpw" >> /etc/sudoers \
 		|| die "Could not append 'Defaults rootpw to /etc/sudoers"
     if [[ "$INSTALL_ANSIBLE" == true ]]; then
@@ -160,6 +171,9 @@ main_install_gentoo_in_chroot() {
 		echo "$USER_NAME ALL=(ALL)ALL" >> /etc/sudoers \
 			|| die "Could not append '$USER_NAME ALL=(ALL)ALL' to /etc/sudoers"
 	fi
+
+
+
     # Installing yay
 	if [[ "$INSTALL_YAY" == true && ( "$CREATE_USER" == true || "$INSTALL_ANSIBLE" == true ) ]]; then
 		if [[ "$CREATE_USER" == true ]]; then
@@ -181,6 +195,8 @@ main_install_gentoo_in_chroot() {
 		passwd -d root
 		ewarn "Root password cleared, set one as soon as possible!"
 	fi
+
+
 
 	# making shure everything in /home/user is onwed by user
 	if [[ "$CREATE_USER" == true ]]; then
